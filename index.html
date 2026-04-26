@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description"
+      content="Galeria virtual de arte solidario. Recorre una sala 3D con obras unicas y aporta para abrir nuevas salas gratuitas." />
+    <meta name="theme-color" content="#1a1612" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Galeria Miau · Sala de arte solidario" />
+    <meta property="og:description"
+      content="Recorre una galeria de arte 3D con cuadros unicos. Cada aporte abre nuevas salas gratuitas." />
+    <meta property="og:site_name" content="Galeria Miau" />
+    <meta property="og:locale" content="es_AR" />
+    <meta property="og:image" content="/artworks/orange-garden-cat.webp" />
+    <meta property="og:image:alt" content="Gato naranjo en una pintura al oleo de la Galeria Miau" />
+    <meta property="og:image:width" content="1024" />
+    <meta property="og:image:height" content="1024" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Galeria Miau · Sala de arte solidario" />
+    <meta name="twitter:description"
+      content="Recorre una galeria 3D con obras unicas. Cada aporte abre nuevas salas." />
+    <meta name="twitter:image" content="/artworks/orange-garden-cat.webp" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+      rel="stylesheet"
+    />
+
+    <title>Galeria Miau · Sala de arte solidario</title>
+  </head>
+  <body>
+    <div class="splash" id="splash" aria-hidden="false">
+      <div class="splash__logo">M</div>
+      <h1 class="splash__title">Galeria Miau</h1>
+      <div class="splash__progress" aria-label="Cargando">
+        <div class="splash__bar" id="splash-bar"></div>
+      </div>
+      <p class="splash__hint">Preparando la sala…</p>
+    </div>
+
+    <div class="welcome" id="welcome" hidden>
+      <div class="welcome__inner">
+        <p class="welcome__kicker">Galeria Miau</p>
+        <h2 class="welcome__title">Una sala de arte solidario</h2>
+        <p class="welcome__copy">Cada obra fue creada para abrir nuevas salas gratuitas. Recorrela a tu ritmo.</p>
+        <div class="welcome__hints">
+          <div class="welcome__hint">
+            <strong>WASD</strong>
+            <span>Moverte</span>
+          </div>
+          <div class="welcome__hint">
+            <strong>Click / E</strong>
+            <span>Ver de cerca</span>
+          </div>
+          <div class="welcome__hint">
+            <strong>Mouse</strong>
+            <span>Mirar</span>
+          </div>
+        </div>
+        <div class="welcome__actions">
+          <button class="welcome__primary" id="welcome-start" type="button">Empezar a explorar</button>
+          <button class="welcome__secondary" id="welcome-tour" type="button">Hacer recorrido guiado</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="artwork-modal" id="artwork-modal" hidden>
+      <button class="artwork-modal__close" id="artwork-modal-close" type="button" aria-label="Cerrar">
+        <i data-lucide="x"></i>
+      </button>
+      <div class="artwork-modal__inner">
+        <div class="artwork-modal__frame">
+          <img class="artwork-modal__image" id="artwork-modal-image" alt="" />
+        </div>
+        <div class="artwork-modal__info">
+          <p class="artwork-modal__kicker">Obra destacada</p>
+          <h2 class="artwork-modal__title" id="artwork-modal-title"></h2>
+          <p class="artwork-modal__meta" id="artwork-modal-meta"></p>
+          <p class="artwork-modal__story" id="artwork-modal-story"></p>
+          <div class="artwork-modal__cta">
+            <button class="artwork-modal__support" id="artwork-modal-support" type="button">
+              <i data-lucide="heart-handshake"></i>
+              <span>Apoyar esta obra</span>
+            </button>
+            <button class="artwork-modal__share" id="artwork-modal-share" type="button">
+              <i data-lucide="share-2"></i>
+              <span>Compartir</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="completion" id="completion" hidden>
+      <button class="completion__close" id="completion-close" type="button" aria-label="Cerrar">
+        <i data-lucide="x"></i>
+      </button>
+      <div class="completion__inner">
+        <div class="completion__badge">
+          <i data-lucide="award"></i>
+        </div>
+        <p class="completion__kicker">Recorrido completo</p>
+        <h2 class="completion__title">Viste las 15 obras</h2>
+        <p class="completion__copy">Tu apoyo mantiene la sala abierta y financia nuevas obras. Cada aporte cuenta.</p>
+        <div class="completion__actions">
+          <button class="completion__primary" id="completion-support" type="button">
+            <i data-lucide="heart-handshake"></i>
+            <span>Aportar a la galeria</span>
+          </button>
+          <button class="completion__secondary" id="completion-share" type="button">
+            <i data-lucide="share-2"></i>
+            <span>Compartir mi visita</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="unsupported" id="unsupported" hidden>
+      <div class="unsupported__inner">
+        <p class="unsupported__kicker">Navegador no compatible</p>
+        <h2 class="unsupported__title">Necesitamos WebGPU o WebGL2</h2>
+        <p class="unsupported__copy">
+          La galería usa renderizado 3D moderno. Probá Chrome, Edge o Safari actualizados, o
+          activá la aceleración por hardware en tu navegador.
+        </p>
+        <a class="unsupported__link" href="https://caniuse.com/webgpu" target="_blank" rel="noreferrer">
+          Ver compatibilidad
+        </a>
+      </div>
+    </div>
+
+    <main id="app" aria-label="Galeria Miau">
+      <canvas id="gallery-canvas"></canvas>
+      <div class="reticle" aria-hidden="true">
+        <span class="reticle__hint">Tocá para ver de cerca</span>
+      </div>
+
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="Galeria Miau">
+          <span class="brand__mark">M</span>
+          <span>
+            <strong>Galeria Miau</strong>
+            <small>Exposicion solidaria</small>
+          </span>
+        </a>
+        <nav class="actions" aria-label="Acciones principales">
+          <button class="icon-button progress-pill" id="progress-pill" type="button" aria-label="Progreso de visita">
+            <i data-lucide="bookmark"></i>
+            <span class="progress-pill__text"><span id="progress-current">0</span>/<span id="progress-total">0</span></span>
+          </button>
+          <button class="icon-button" id="tour-toggle" type="button" aria-label="Recorrido guiado">
+            <i data-lucide="play"></i>
+          </button>
+          <button class="icon-button" id="sound-toggle" type="button" aria-label="Ambiente silenciado">
+            <i data-lucide="volume-x"></i>
+          </button>
+          <button class="donate-button" id="donate-open" type="button">
+            <i data-lucide="heart-handshake"></i>
+            <span>Aportar</span>
+          </button>
+        </nav>
+      </header>
+
+      <button class="enter-button" id="enter-gallery" type="button">
+        <i data-lucide="mouse-pointer-2"></i>
+        <span>Entrar</span>
+      </button>
+
+      <aside class="art-panel" id="art-panel" hidden>
+        <div class="art-panel__rule" aria-hidden="true"></div>
+        <div class="art-panel__catalog">
+          <span class="art-panel__sigla">M·</span><span id="art-number">01</span>
+        </div>
+        <h1 class="art-panel__title" id="art-title"></h1>
+        <p class="art-panel__meta" id="art-meta"></p>
+        <p class="art-panel__story" id="art-story"></p>
+        <button class="art-panel__support" id="art-donate" type="button">
+          <span>Apoyar esta obra</span>
+          <span class="art-panel__support-arrow" aria-hidden="true">→</span>
+        </button>
+      </aside>
+
+      <section class="donation-panel" id="donation-panel" hidden aria-label="Aportes">
+        <button class="icon-button donation-panel__close" id="donate-close" type="button" aria-label="Cerrar">
+          <i data-lucide="x"></i>
+        </button>
+        <p class="donation-panel__kicker">Aporte voluntario</p>
+        <h2 id="donation-title"></h2>
+        <p id="donation-copy"></p>
+        <div class="tiers" id="donation-tiers"></div>
+        <a class="donation-panel__checkout" id="donation-checkout" target="_blank" rel="noreferrer">
+          <i data-lucide="external-link"></i>
+          <span>Continuar</span>
+        </a>
+      </section>
+
+      <footer class="sponsor-strip" id="sponsor-strip">
+        <span id="sponsor-label"></span>
+        <a id="sponsor-link" target="_blank" rel="noreferrer"></a>
+      </footer>
+
+      <aside class="perf-panel" id="perf-panel" aria-label="Rendimiento">
+        <div><strong id="perf-fps">--</strong><span>FPS</span></div>
+        <div><strong id="perf-ms">--</strong><span>ms</span></div>
+        <div><strong id="perf-draws">--</strong><span>draws</span></div>
+        <div><strong id="perf-tris">--</strong><span>tris</span></div>
+        <div><strong id="perf-textures">--</strong><span>tex</span></div>
+        <div><strong id="perf-heap">--</strong><span>MB</span></div>
+      </aside>
+
+      <div class="mobile-controls" aria-label="Controles tactiles">
+        <button class="control control--up" type="button" aria-label="Avanzar" data-control="forward">
+          <i data-lucide="arrow-up"></i>
+        </button>
+        <button class="control control--left" type="button" aria-label="Izquierda" data-control="left">
+          <i data-lucide="arrow-left"></i>
+        </button>
+        <button class="control control--right" type="button" aria-label="Derecha" data-control="right">
+          <i data-lucide="arrow-right"></i>
+        </button>
+        <button class="control control--down" type="button" aria-label="Retroceder" data-control="backward">
+          <i data-lucide="arrow-down"></i>
+        </button>
+      </div>
+
+      <div class="turn-controls" aria-label="Rotacion tactil">
+        <button class="control" type="button" aria-label="Girar izquierda" data-control="turnLeft">
+          <i data-lucide="rotate-ccw"></i>
+        </button>
+        <button class="control" type="button" aria-label="Girar derecha" data-control="turnRight">
+          <i data-lucide="rotate-cw"></i>
+        </button>
+      </div>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "name": "galeria-miau",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Galeria virtual de arte solidario en WebGPU/WebGL2 con three.js",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "verify": "node scripts/verify-gallery.mjs",
+    "compress-textures": "node scripts/compress-textures.mjs"
+  },
+  "dependencies": {
+    "lucide": "^1.11.0",
+    "three": "0.184.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.59.1",
+    "sharp": "^0.34.5",
+    "vite": "^8.0.10"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "packageManager": "pnpm@10.33.0"
+}
