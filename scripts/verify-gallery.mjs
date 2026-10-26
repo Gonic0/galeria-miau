@@ -44,12 +44,20 @@ try {
 
     const result = { viewport: viewport.name };
     try {
+      console.error(`[${viewport.name}] Loading the production build`);
       await page.goto(url, { waitUntil: 'domcontentloaded' });
       await page.waitForFunction(() => Boolean(window.__galleryDebug?.getState));
       await page.locator('#splash').waitFor({ state: 'hidden' });
-      await page.locator('#welcome-start').click();
+      // The first software-rendered frame can compile shaders on the runner.
+      await page.waitForFunction(
+        () => Number(document.querySelector('#perf-draws')?.textContent) > 0,
+        null,
+        { timeout: 120000 }
+      );
+      await page.locator('#welcome-start').click({ timeout: 120000 });
       await page.locator('#welcome').waitFor({ state: 'hidden' });
       await page.locator('#gallery-canvas').waitFor({ state: 'visible' });
+      console.error(`[${viewport.name}] Gallery ready; checking movement and artwork detail`);
       await page.waitForFunction(() =>
         performance.getEntriesByType('resource').some((entry) => entry.name.includes('/artworks/'))
       );
@@ -127,6 +135,7 @@ try {
       await page.locator('#donate-close').click();
       await page.locator('#donation-panel').waitFor({ state: 'hidden' });
       result.contributionLinks = 'ok';
+      console.error(`[${viewport.name}] Artwork, movement and contribution checks passed`);
     } catch (error) {
       failures.push(`${viewport.name}: ${error.message}`);
       await page.screenshot({ path: path.join(outputDir, `failure-${viewport.name}.png`) }).catch(() => {});
