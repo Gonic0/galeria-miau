@@ -12,29 +12,20 @@ export const galleryConfig = {
     start: { x: 0, y: 1.62, z: 14.2, yaw: 0 }
   },
   donation: {
-    title: 'Ayuda a abrir nuevas salas gratuitas',
+    title: 'Una demo abierta a colaboración',
     copy:
-      'Cada aporte financia nuevas imagenes, hosting, mediacion cultural y espacios de exhibicion para artistas invitados.',
-    checkoutUrl: 'https://example.org/donar',
-    tiers: [
-      { amount: '$3', label: 'Postal digital' },
-      { amount: '$8', label: 'Sala mensual' },
-      { amount: '$18', label: 'Obra invitada' }
-    ]
+      'Esta sala es una demostración técnica: no recibe donaciones ni procesa pagos. Puedes explorar el código, reportar un error o proponer mejoras en GitHub.',
+    checkoutUrl: 'https://github.com/Gonic0/galeria-miau',
+    tiers: []
   },
   sponsorRotationSeconds: 12
 };
 
 export const sponsors = [
   {
-    label: 'Aliado cultural: Arena Eco Miau',
-    cta: 'Ver marca',
-    url: 'https://example.org/aliado-1'
-  },
-  {
-    label: 'Patrocinio suave: Cafe Bigotes',
-    cta: 'Conocer',
-    url: 'https://example.org/aliado-2'
+    label: 'Galería Miau · Demo interactiva',
+    cta: 'Código en GitHub',
+    url: 'https://github.com/Gonic0/galeria-miau'
   }
 ];
 

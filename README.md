@@ -1,123 +1,100 @@
 # Galería Miau
 
-Galería virtual de arte solidario en WebGPU/WebGL2 con three.js r184. Recorrido 3D inmersivo con post-procesamiento TSL (SSR, GTAO, SMAA, Film, LUT, Anamorphic, Outline) y diseño visual de museo (cédulas tipográficas serif, iluminación cinematográfica con tone mapping ACES).
+[![CI](https://github.com/Gonic0/galeria-miau/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Gonic0/galeria-miau/actions/workflows/ci.yml)
 
-## Stack
+Galería de arte 3D para recorrer desde el navegador, con three.js, WebGPU y fallback a WebGL2.
 
-- **three.js 0.184** con `WebGPURenderer` + fallback automático a WebGL2
-- **TSL (Three Shading Language)** para todo el pipeline post-pro
-- **Vite 8** con Rolldown + code splitting de three-core / three-postprocess / lucide / app
-- **lucide** para iconografía
-- **Cormorant Garamond** vía Google Fonts para tipografía de cédulas
-- **WebAudio sintético** para ambiente, pasos y maullidos (sin assets)
+*An interactive 3D art gallery built with three.js, WebGPU and a WebGL2 fallback.*
 
-## Desarrollo
+[**Probar la demo**](https://galeria-miau.vercel.app/) · [Reportar un error](https://github.com/Gonic0/galeria-miau/issues) · [Proponer una mejora](https://github.com/Gonic0/galeria-miau/issues/new)
+
+![Vista de la sala de Galería Miau, con cuadros de gatos, iluminación de museo y controles de navegación](docs/gallery-preview.png)
+
+## Estado del proyecto
+
+Es una **demo técnica**, con cuatro obras únicas distribuidas en quince posiciones. No recibe donaciones ni procesa pagos. Los botones de colaboración y el enlace del pie llevan a este repositorio; no hay patrocinadores comerciales asociados a la demo.
+
+La licencia del código y las condiciones de reutilización de las imágenes están pendientes de definición.
+
+## Qué puedes probar
+
+- Recorrido libre con teclado y mouse, o controles táctiles en móvil.
+- Recorrido guiado, vista ampliada de cada obra y enlaces para compartirla.
+- Progreso de visita guardado en el navegador.
+- Audio ambiental sintético que puedes activar desde la sala.
+- Renderizado con WebGPU cuando está disponible y fallback a WebGL2.
+
+## Ejecutar en local
+
+Necesitas **Node.js 24** y **pnpm 10.33.0**, la versión fijada en `package.json`.
 
 ```bash
-pnpm install
+pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Abrir `http://localhost:5173`. Requiere navegador con WebGPU o WebGL2 habilitado. Probado en Chrome 121+, Edge 121+, Safari 18+.
+Abre `http://localhost:5173`. El navegador necesita WebGPU o WebGL2 y aceleración gráfica habilitada. No se requieren cuentas, claves ni variables de entorno para explorar la galería.
 
-### Scripts
+## Comprobaciones automáticas
 
-```bash
-pnpm dev                  # servidor dev en :5173
-pnpm build                # build de producción a dist/
-pnpm preview              # servidor de preview del build
-pnpm compress-textures    # convierte PNG en public/artworks/ a WebP (sharp)
-pnpm verify               # smoke test con Playwright
-```
+El workflow [CI](https://github.com/Gonic0/galeria-miau/actions/workflows/ci.yml) se ejecuta en cada PR y en los cambios de `main`. Instala las dependencias fijadas, compila la aplicación y prueba la versión de producción en escritorio y móvil.
 
-## Deploy a Vercel
+La prueba de navegador comprueba que la sala se renderiza, carga obras, permite moverse y muestra una invitación a colaborar sin pagos ni enlaces de ejemplo. También detecta errores de consola y respuestas HTTP fallidas del sitio. Guarda capturas y un informe en `test-results/`, disponibles como artefactos de la ejecución durante siete días.
 
-El proyecto está pre-configurado con `vercel.json` y code splitting optimizado. Tres opciones:
-
-### Opción A: GitHub + Vercel UI
-
-1. Push del repo a GitHub
-2. En Vercel: **New Project** → importar el repo
-3. Vercel detecta el `vercel.json` y usa:
-   - Build: `pnpm build`
-   - Install: `pnpm install --frozen-lockfile`
-   - Output: `dist`
-4. Deploy automático en cada push
-
-### Opción B: Vercel CLI
+Para repetirla en local:
 
 ```bash
-pnpm dlx vercel
-# Primera vez: link al proyecto
-pnpm dlx vercel --prod
-```
-
-### Opción C: drag-and-drop
-
-```bash
+pnpm exec playwright install chromium
 pnpm build
-# subir la carpeta dist/ a vercel.com/new
+pnpm preview
 ```
 
-### Cache headers configurados
+Con la vista previa abierta, en otra terminal:
 
-`vercel.json` aplica `Cache-Control: public, max-age=31536000, immutable` a:
-- `/assets/*` — chunks JS/CSS con hash
-- `/artworks/*` — imágenes WebP de obras
-- `/hdr/*` — mapas HDR para PMREM environment
-
-`index.html` queda con `must-revalidate` para que cada deploy invalide el shell.
-
-### Variables de entorno
-
-Ninguna requerida. La galería corre 100% client-side. Si más adelante agregamos Mercado Pago u otros endpoints, las claves van en Vercel → Settings → Environment Variables.
-
-## Estructura
-
-```
-.
-├── public/
-│   ├── artworks/          # WebP de las obras (970KB total)
-│   ├── hdr/               # HDR equirectangular para environment (1KB)
-│   └── user-photos/       # placeholders para futuras obras
-├── src/
-│   ├── main.js            # entry point, escena 3D, pipeline TSL, UI logic
-│   ├── styles.css         # CSS app-wide, cédula serif, modal
-│   └── gallery/
-│       ├── catalog.js     # config de obras, donaciones, sponsors
-│       └── audio.js       # WebAudio sintético
-├── scripts/
-│   ├── compress-textures.mjs    # PNG → WebP con sharp
-│   └── verify-gallery.mjs       # smoke test
-├── vite.config.js         # code splitting + asset paths
-├── vercel.json            # cache headers + framework=null
-├── index.html             # shell con splash, welcome, modal
-└── package.json
+```bash
+GALLERY_URL=http://127.0.0.1:4173/ pnpm verify
 ```
 
-## Inyectar nuevas obras
+La prueba usa Chromium para verificar el **fallback WebGL2**, permitiendo renderizado por software cuando no hay una GPU disponible. Comprueba también que los cuadros contienen detalle visible, para detectar una sala con marcos vacíos. No mide rendimiento ni valida WebGPU nativo; esos casos necesitan una revisión en el navegador y equipo correspondientes.
 
-1. Agregá la foto en `public/artworks/` (preferentemente WebP — usá `pnpm compress-textures` para convertir desde PNG).
-2. Sumala a `temporaryPhotos` en `src/gallery/catalog.js` con `id`, `title`, `artist`, `year`, `image`, `frame`, `accent`, `story`, `prompt`.
-3. La sala rellena las 15 posiciones de `artworkSlots` repitiendo las fotos disponibles.
+## Cómo colaborar
 
-Las paredes son `front`, `back`, `left` y `right`. El `offset` mueve cada marco a lo largo de esa pared. Las fotos se recortan automáticamente sin deformarse.
+Para reportar un error, incluye el navegador y su versión, sistema operativo, pasos para reproducirlo y lo que esperabas ver. Si el problema es visual, añade una captura y señala si ocurre con WebGPU o WebGL2 cuando puedas comprobarlo.
 
-## Configuración de campaña
+Para proponer un cambio, abre primero un issue si afecta al recorrido, al catálogo o al diseño de la sala. Las mejoras pequeñas pueden ir directamente en una PR con su propósito y las comprobaciones realizadas.
 
-`galleryConfig.donation` y `sponsors` en `src/gallery/catalog.js` definen el panel de aportes y la franja de patrocinadores. Cambiá `checkoutUrl` cuando tengas la URL real de Mercado Pago u otro proveedor.
+Áreas en las que colaborar:
 
-## Performance objetivo
+- Accesibilidad del recorrido, navegación por teclado y movimiento reducido.
+- Compatibilidad del renderizado entre navegadores.
+- Compresión de texturas y mediciones de rendimiento reproducibles.
 
-- **Mobile portrait (390px)**: 60+ FPS WebGPU, 30+ FPS WebGL2 fallback
-- **Tablet (768px)**: 60 FPS WebGPU
-- **Desktop (1280px)**: 60+ FPS
-- Bundle gzip: ~300KB (three-core 233KB + postprocess 46KB + app 16KB + lucide 2KB)
+## Stack y estructura
 
-## Roadmap
+- **three.js 0.184**: `WebGPURenderer` y postprocesado con TSL.
+- **Vite 8**: desarrollo y compilación con separación de dependencias.
+- **lucide**: iconos de la interfaz.
+- **WebAudio**: ambiente, pasos y maullidos sintetizados.
+- **Playwright**: comprobaciones del recorrido en escritorio y móvil.
 
-- [ ] Postal compartible al completar las 4 obras únicas (Web Share API)
-- [ ] Audio guía con Speech Synthesis al enfocar cada obra
-- [ ] `prefers-reduced-motion` para desactivar animaciones
-- [ ] Mercado Pago Checkout Bricks para donaciones reales
-- [ ] KTX2/BasisU para texturas comprimidas GPU-side
+```text
+public/artworks/              Imágenes de las obras
+src/main.js                  Escena, renderizado e interacción
+src/styles.css               Interfaz y diseño adaptable
+src/gallery/catalog.js       Obras, posiciones y enlaces del proyecto
+src/gallery/audio.js         Audio sintético
+scripts/verify-gallery.mjs   Comprobación de navegador
+.github/workflows/ci.yml     Compilación y pruebas automáticas
+```
+
+Para añadir una obra, guarda su imagen en `public/artworks/` y añádela a `temporaryPhotos` en `src/gallery/catalog.js`, con título, autor, año y descripción. `artworkSlots` define dónde se muestran las obras. Conserva los créditos y documenta las condiciones de uso de las imágenes que propongas.
+
+```bash
+pnpm compress-textures       # Convierte PNG a WebP con sharp
+```
+
+## Publicar una copia
+
+El proyecto incluye `vercel.json` para compilar con `pnpm build` y servir `dist/`. Puedes importar el repositorio en Vercel o publicar ese directorio con un proveedor de alojamiento estático.
+
+Los enlaces de colaboración se definen en `galleryConfig.donation` y `sponsors`, dentro de `src/gallery/catalog.js`. Si publicas una copia, actualiza también los enlaces del README y conserva una descripción clara del estado de la demo.

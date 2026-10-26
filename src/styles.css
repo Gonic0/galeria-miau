@@ -1107,6 +1107,10 @@ a {
   gap: 8px;
 }
 
+.tiers:empty {
+  display: none;
+}
+
 .tier {
   min-height: 76px;
   padding: 10px 8px;
