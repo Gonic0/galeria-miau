@@ -29,7 +29,7 @@ try {
       deviceScaleFactor: 1
     });
     const page = await context.newPage();
-    page.setDefaultTimeout(30000);
+    page.setDefaultTimeout(120000);
     const consoleErrors = [];
     const failedResponses = [];
     page.on('console', (message) => {
@@ -46,15 +46,16 @@ try {
     try {
       console.error(`[${viewport.name}] Loading the production build`);
       await page.goto(url, { waitUntil: 'domcontentloaded' });
-      await page.waitForFunction(() => Boolean(window.__galleryDebug?.getState));
-      await page.locator('#splash').waitFor({ state: 'hidden' });
-      // The first software-rendered frame can compile shaders on the runner.
+      // Wait for initialization and the first frame before sending UI input.
+      // Shader compilation and frame delivery are slow on CPU-only runners.
       await page.waitForFunction(
-        () => Number(document.querySelector('#perf-draws')?.textContent) > 0,
+        () => Boolean(window.__galleryDebug?.getState) &&
+          !document.querySelector('#splash') &&
+          Number(document.querySelector('#perf-draws')?.textContent) > 0,
         null,
-        { timeout: 120000 }
+        { timeout: 180000 }
       );
-      await page.locator('#welcome-start').click({ timeout: 120000 });
+      await page.locator('#welcome-start').click();
       await page.locator('#welcome').waitFor({ state: 'hidden' });
       await page.locator('#gallery-canvas').waitFor({ state: 'visible' });
       console.error(`[${viewport.name}] Gallery ready; checking movement and artwork detail`);
