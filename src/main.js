@@ -963,7 +963,7 @@ function addSponsorInstallation() {
   panel.receiveShadow = true;
   group.add(panel);
 
-  const sponsorTexture = makeTextTexture('Patrocinio suave', 'Espacio para marcas aliadas', '#2f7368');
+  const sponsorTexture = makeTextTexture('Galería Miau', 'Demo · código disponible en GitHub', '#2f7368');
   const screen = new THREE.Mesh(
     new THREE.PlaneGeometry(3.45, 0.78),
     new THREE.MeshBasicMaterial({ map: sponsorTexture, transparent: true })
@@ -1890,6 +1890,25 @@ function setupDebugBridge() {
   window.__galleryDebug = {
     artworks: artworks.map(({ id, title, image }) => ({ id, title, image })),
     sources: [...new Set(artworks.map((artwork) => artwork.image))],
+    artworkSamples() {
+      return artworkMeshes.map((mesh) => {
+        const artwork = mesh.userData.artwork;
+        const points = [];
+        for (let row = 1; row <= 5; row += 1) {
+          for (let col = 1; col <= 5; col += 1) {
+            const point = mesh.localToWorld(new THREE.Vector3(
+              (col / 6 - 0.5) * artwork.width * 0.8,
+              (row / 6 - 0.5) * artwork.height * 0.8,
+              0
+            )).project(camera);
+            if (point.z >= -1 && point.z <= 1 && Math.abs(point.x) < 1 && Math.abs(point.y) < 1) {
+              points.push([(point.x + 1) / 2, (1 - point.y) / 2]);
+            }
+          }
+        }
+        return { id: artwork.id, points };
+      }).filter(({ points }) => points.length === 25);
+    },
     getState: () => ({
       camera: camera.position.toArray(),
       yaw: cameraState.yaw,

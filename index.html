@@ -4,13 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description"
-      content="Galeria virtual de arte solidario. Recorre una sala 3D con obras unicas y aporta para abrir nuevas salas gratuitas." />
+      content="Explora Galería Miau, una demo de galería 3D con WebGPU y WebGL2. Recorre las obras y colabora con el proyecto en GitHub. Sin pagos ni donaciones reales." />
     <meta name="theme-color" content="#1a1612" />
 
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Galeria Miau · Sala de arte solidario" />
+    <meta property="og:title" content="Galería Miau · Demo de galería 3D" />
     <meta property="og:description"
-      content="Recorre una galeria de arte 3D con cuadros unicos. Cada aporte abre nuevas salas gratuitas." />
+      content="Una demo interactiva de arte en 3D con WebGPU y WebGL2. Explora la sala y el código en GitHub. Sin pagos ni donaciones reales." />
     <meta property="og:site_name" content="Galeria Miau" />
     <meta property="og:locale" content="es_AR" />
     <meta property="og:image" content="/artworks/orange-garden-cat.webp" />
@@ -19,9 +19,9 @@
     <meta property="og:image:height" content="1024" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Galeria Miau · Sala de arte solidario" />
+    <meta name="twitter:title" content="Galería Miau · Demo de galería 3D" />
     <meta name="twitter:description"
-      content="Recorre una galeria 3D con obras unicas. Cada aporte abre nuevas salas." />
+      content="Explora una demo de galería 3D y colabora en GitHub. Sin pagos ni donaciones reales." />
     <meta name="twitter:image" content="/artworks/orange-garden-cat.webp" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -31,7 +31,7 @@
       rel="stylesheet"
     />
 
-    <title>Galeria Miau · Sala de arte solidario</title>
+    <title>Galería Miau · Demo de galería 3D</title>
   </head>
   <body>
     <div class="splash" id="splash" aria-hidden="false">
@@ -46,8 +46,8 @@
     <div class="welcome" id="welcome" hidden>
       <div class="welcome__inner">
         <p class="welcome__kicker">Galeria Miau</p>
-        <h2 class="welcome__title">Una sala de arte solidario</h2>
-        <p class="welcome__copy">Cada obra fue creada para abrir nuevas salas gratuitas. Recorrela a tu ritmo.</p>
+        <h2 class="welcome__title">Una sala de arte para explorar</h2>
+        <p class="welcome__copy">Recorre esta demo 3D a tu ritmo. Puedes explorar el código y proponer mejoras en GitHub.</p>
         <div class="welcome__hints">
           <div class="welcome__hint">
             <strong>WASD</strong>
@@ -85,7 +85,7 @@
           <div class="artwork-modal__cta">
             <button class="artwork-modal__support" id="artwork-modal-support" type="button">
               <i data-lucide="heart-handshake"></i>
-              <span>Apoyar esta obra</span>
+              <span>Contribuir al proyecto</span>
             </button>
             <button class="artwork-modal__share" id="artwork-modal-share" type="button">
               <i data-lucide="share-2"></i>
@@ -106,11 +106,11 @@
         </div>
         <p class="completion__kicker">Recorrido completo</p>
         <h2 class="completion__title">Viste las 15 obras</h2>
-        <p class="completion__copy">Tu apoyo mantiene la sala abierta y financia nuevas obras. Cada aporte cuenta.</p>
+        <p class="completion__copy">Gracias por explorar la demo. Puedes compartir tu visita o proponer mejoras en GitHub.</p>
         <div class="completion__actions">
           <button class="completion__primary" id="completion-support" type="button">
             <i data-lucide="heart-handshake"></i>
-            <span>Aportar a la galeria</span>
+            <span>Contribuir al proyecto</span>
           </button>
           <button class="completion__secondary" id="completion-share" type="button">
             <i data-lucide="share-2"></i>
@@ -145,7 +145,7 @@
           <span class="brand__mark">M</span>
           <span>
             <strong>Galeria Miau</strong>
-            <small>Exposicion solidaria</small>
+            <small>Demo interactiva</small>
           </span>
         </a>
         <nav class="actions" aria-label="Acciones principales">
@@ -161,7 +161,7 @@
           </button>
           <button class="donate-button" id="donate-open" type="button">
             <i data-lucide="heart-handshake"></i>
-            <span>Aportar</span>
+            <span>Contribuir</span>
           </button>
         </nav>
       </header>
@@ -180,22 +180,22 @@
         <p class="art-panel__meta" id="art-meta"></p>
         <p class="art-panel__story" id="art-story"></p>
         <button class="art-panel__support" id="art-donate" type="button">
-          <span>Apoyar esta obra</span>
+          <span>Contribuir al proyecto</span>
           <span class="art-panel__support-arrow" aria-hidden="true">→</span>
         </button>
       </aside>
 
-      <section class="donation-panel" id="donation-panel" hidden aria-label="Aportes">
+      <section class="donation-panel" id="donation-panel" hidden aria-label="Contribuir al proyecto">
         <button class="icon-button donation-panel__close" id="donate-close" type="button" aria-label="Cerrar">
           <i data-lucide="x"></i>
         </button>
-        <p class="donation-panel__kicker">Aporte voluntario</p>
+        <p class="donation-panel__kicker">Demo · sin pagos reales</p>
         <h2 id="donation-title"></h2>
         <p id="donation-copy"></p>
         <div class="tiers" id="donation-tiers"></div>
         <a class="donation-panel__checkout" id="donation-checkout" target="_blank" rel="noreferrer">
           <i data-lucide="external-link"></i>
-          <span>Continuar</span>
+          <span>Ver código y colaborar</span>
         </a>
       </section>
 
