@@ -15,9 +15,13 @@ concurrency:
 
 jobs:
   build-and-verify:
-    name: Build and browser checks
-    runs-on: ubuntu-latest
+    name: Build and browser checks (${{ matrix.viewport }})
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        viewport: [mobile, desktop]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -33,6 +37,7 @@ jobs:
       - name: Verify the production build on desktop and mobile
         env:
           GALLERY_URL: http://127.0.0.1:4173/
+          GALLERY_VIEWPORT: ${{ matrix.viewport }}
         run: |
           mkdir -p test-results
           pnpm preview --host 127.0.0.1 --port 4173 --strictPort > test-results/preview.log 2>&1 &
@@ -50,7 +55,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: gallery-verification
+          name: gallery-verification-${{ matrix.viewport }}
           path: test-results/
           if-no-files-found: ignore
           retention-days: 7

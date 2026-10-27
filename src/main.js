@@ -248,19 +248,26 @@ try {
 const splashEl = document.querySelector('#splash');
 const splashBarEl = document.querySelector('#splash-bar');
 const loadingManager = new THREE.LoadingManager();
+const failedAssets = [];
+const startupAssetsReady = new Promise((resolve) => {
+  loadingManager.onLoad = resolve;
+});
+loadingManager.onError = (url) => failedAssets.push(url);
+// The HDR can finish while fonts are pending, before buildGallery registers the artworks.
+loadingManager.itemStart('gallery-startup');
 loadingManager.onProgress = (_url, loaded, total) => {
   if (!splashBarEl) return;
   const pct = total > 0 ? Math.round((loaded / total) * 100) : 0;
   splashBarEl.style.width = `${pct}%`;
 };
-loadingManager.onLoad = () => {
+function dismissSplash() {
   if (!splashEl) return;
   splashBarEl.style.width = '100%';
   setTimeout(() => {
     splashEl.classList.add('is-fading');
     setTimeout(() => splashEl.remove(), 700);
   }, 280);
-};
+}
 
 const pmremGenerator = new THREE.PMREMGenerator(renderer);
 scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
@@ -444,6 +451,7 @@ if (document.fonts?.load) {
 }
 
 buildGallery();
+loadingManager.itemEnd('gallery-startup');
 setupDonationPanel();
 setupSponsors();
 setupEvents();
@@ -2356,6 +2364,7 @@ function resize() {
   renderer.setSize(width, height);
 }
 
+let firstFrameRendered = false;
 function animate() {
   const delta = Math.min(clock.getDelta(), 0.033);
   perfState.frames += 1;
@@ -2370,7 +2379,18 @@ function animate() {
     shaderTimeUniforms[i].value = clock.elapsedTime;
   }
   renderPipeline.render();
+  if (!firstFrameRendered) {
+    firstFrameRendered = true;
+    dismissSplash();
+  }
   updatePerfPanel(clock.elapsedTime);
+}
+// Start drawing only when the artwork images are ready for their first GPU upload.
+await startupAssetsReady;
+const failedArtworks = failedAssets.filter((url) => url.includes('/artworks/'));
+if (failedArtworks.length) {
+  document.querySelector('.splash__hint').textContent = 'No pudimos cargar las obras. Recarga la página para intentarlo de nuevo.';
+  throw new Error(`Failed to load gallery artworks: ${failedArtworks.join(', ')}`);
 }
 renderer.setAnimationLoop(animate);
 

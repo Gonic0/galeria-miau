@@ -37,7 +37,7 @@ Abre `http://localhost:5173`. El navegador necesita WebGPU o WebGL2 y aceleraci�
 
 ## Comprobaciones automáticas
 
-El workflow [CI](https://github.com/Gonic0/galeria-miau/actions/workflows/ci.yml) se ejecuta en cada PR y en los cambios de `main`. Instala las dependencias fijadas, compila la aplicación y prueba la versión de producción en escritorio y móvil.
+El workflow [CI](https://github.com/Gonic0/galeria-miau/actions/workflows/ci.yml) se ejecuta en cada PR y en los cambios de `main`. Instala las dependencias fijadas, compila la aplicación y prueba la versión de producción en escritorio y móvil. Cada vista usa un job independiente para que las compilaciones de shaders no compartan caché ni acumulen sus tiempos de ejecución.
 
 La prueba de navegador comprueba que la sala se renderiza, carga obras, permite moverse y muestra una invitación a colaborar sin pagos ni enlaces de ejemplo. También detecta errores de consola y respuestas HTTP fallidas del sitio. Guarda capturas y un informe en `test-results/`, disponibles como artefactos de la ejecución durante siete días.
 
@@ -55,7 +55,9 @@ Con la vista previa abierta, en otra terminal:
 GALLERY_URL=http://127.0.0.1:4173/ pnpm verify
 ```
 
-La prueba usa Chromium para verificar el **fallback WebGL2**, permitiendo renderizado por software cuando no hay una GPU disponible. Comprueba también que los cuadros contienen detalle visible, para detectar una sala con marcos vacíos. No mide rendimiento ni valida WebGPU nativo; esos casos necesitan una revisión en el navegador y equipo correspondientes.
+La prueba usa Chromium para verificar el **fallback WebGL2**, permitiendo renderizado por software cuando no hay una GPU disponible. El caso móvil se ejecuta primero, sin caché ni recargas: reproduce un origen HTTPS con los archivos del build local y retrasa 150 ms las imágenes para simular su llegada desde una CDN. Comprueba que todas las obras visibles contienen detalle en la primera vista, antes de mover la cámara o volver a pedir imágenes, y confirma que el motor es WebGL2/SwiftShader.
+
+Para ejecutar solo ese caso, usa `GALLERY_VIEWPORT=mobile` junto con `GALLERY_URL` al llamar a `pnpm verify`. `GALLERY_OUTPUT_DIR` permite guardar sus capturas e informe en otra carpeta. La comprobación no mide rendimiento ni valida WebGPU nativo; esos casos necesitan una revisión en el navegador y equipo correspondientes.
 
 ## Cómo colaborar
 
