@@ -37,7 +37,7 @@ Abre `http://localhost:5173`. El navegador necesita WebGPU o WebGL2 y aceleraci�
 
 ## Comprobaciones automáticas
 
-El workflow [CI](https://github.com/Gonic0/galeria-miau/actions/workflows/ci.yml) se ejecuta en cada PR y en los cambios de `main`. Instala las dependencias fijadas, compila la aplicación y prueba la versión de producción en escritorio y móvil.
+El workflow [CI](https://github.com/Gonic0/galeria-miau/actions/workflows/ci.yml) se ejecuta en cada PR y en los cambios de `main`. Instala las dependencias fijadas, compila la aplicación y prueba la versión de producción en escritorio y móvil. Cada vista usa un job independiente para que las compilaciones de shaders no compartan caché ni acumulen sus tiempos de ejecución.
 
 La prueba de navegador comprueba que la sala se renderiza, carga obras, permite moverse y muestra una invitación a colaborar sin pagos ni enlaces de ejemplo. También detecta errores de consola y respuestas HTTP fallidas del sitio. Guarda capturas y un informe en `test-results/`, disponibles como artefactos de la ejecución durante siete días.
 

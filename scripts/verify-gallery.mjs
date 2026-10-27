@@ -88,8 +88,9 @@ try {
         if (!renderer?.includes('SwiftShader')) throw new Error(`expected WebGL2/SwiftShader, got ${renderer}`);
         if (delayedArtworks.size !== 4) throw new Error(`expected four delayed real artworks, got ${delayedArtworks.size}`);
         const samples = await page.evaluate(() => window.__galleryDebug.artworkSamples());
-        const firstLoad = await readCanvasPixels(await page.locator('#gallery-canvas').screenshot(), samples);
-        await page.screenshot({ path: path.join(outputDir, 'cold-mobile.png') });
+        const firstLoadImage = await page.locator('#gallery-canvas').screenshot();
+        const firstLoad = await readCanvasPixels(firstLoadImage, samples);
+        await writeFile(path.join(outputDir, 'cold-mobile.png'), firstLoadImage);
         result.firstLoad = { renderer, delayedArtworks: [...delayedArtworks], pixelStats: firstLoad };
         const blankArtworks = firstLoad.artworks.filter((artwork) => artwork.lumaDeviation < 12);
         if (firstLoad.artworks.length < 2 || blankArtworks.length) {
@@ -135,7 +136,8 @@ try {
       if (movement < 0.18) throw new Error(`camera did not move enough (${movement.toFixed(3)}m)`);
 
       const artworkSamples = await page.evaluate(() => window.__galleryDebug.artworkSamples());
-      const pixelStats = await readCanvasPixels(await page.locator('#gallery-canvas').screenshot(), artworkSamples);
+      const galleryImage = await page.locator('#gallery-canvas').screenshot();
+      const pixelStats = await readCanvasPixels(galleryImage, artworkSamples);
       if (pixelStats.nonDarkSamples < 20 || pixelStats.colorfulSamples < 4) {
         throw new Error(`canvas looked blank or too flat: ${JSON.stringify(pixelStats)}`);
       }
@@ -146,7 +148,7 @@ try {
       if (artworkCount < 1) throw new Error('no artworks were initialized');
 
       const screenshot = path.join(outputDir, `gallery-${viewport.name}.png`);
-      await page.screenshot({ path: screenshot });
+      await writeFile(screenshot, galleryImage);
       Object.assign(result, { screenshot, artworkCount, movement: Number(movement.toFixed(3)), pixelStats });
 
       await page.locator('#donate-open').click();
