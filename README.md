@@ -55,7 +55,9 @@ Con la vista previa abierta, en otra terminal:
 GALLERY_URL=http://127.0.0.1:4173/ pnpm verify
 ```
 
-La prueba usa Chromium para verificar el **fallback WebGL2**, permitiendo renderizado por software cuando no hay una GPU disponible. Comprueba también que los cuadros contienen detalle visible, para detectar una sala con marcos vacíos. No mide rendimiento ni valida WebGPU nativo; esos casos necesitan una revisión en el navegador y equipo correspondientes.
+La prueba usa Chromium para verificar el **fallback WebGL2**, permitiendo renderizado por software cuando no hay una GPU disponible. El caso móvil se ejecuta primero, sin caché ni recargas: reproduce un origen HTTPS con los archivos del build local y retrasa 150 ms las imágenes para simular su llegada desde una CDN. Comprueba que todas las obras visibles contienen detalle en la primera vista, antes de mover la cámara o volver a pedir imágenes, y confirma que el motor es WebGL2/SwiftShader.
+
+Para ejecutar solo ese caso, usa `GALLERY_VIEWPORT=mobile` junto con `GALLERY_URL` al llamar a `pnpm verify`. `GALLERY_OUTPUT_DIR` permite guardar sus capturas e informe en otra carpeta. La comprobación no mide rendimiento ni valida WebGPU nativo; esos casos necesitan una revisión en el navegador y equipo correspondientes.
 
 ## Cómo colaborar
 

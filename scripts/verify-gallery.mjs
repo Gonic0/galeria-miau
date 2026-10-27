@@ -4,12 +4,15 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const url = process.env.GALLERY_URL ?? 'http://localhost:5173/';
-const outputDir = path.resolve('test-results');
+const outputDir = path.resolve(process.env.GALLERY_OUTPUT_DIR ?? 'test-results');
 const projectUrl = 'https://github.com/Gonic0/galeria-miau';
+const requestedViewport = process.env.GALLERY_VIEWPORT;
+// Run mobile first so the desktop case cannot warm the browser's shader cache.
 const viewports = [
-  { name: 'desktop', width: 1280, height: 720, isMobile: false, hasTouch: false },
-  { name: 'mobile', width: 390, height: 844, isMobile: true, hasTouch: true }
-];
+  { name: 'mobile', width: 390, height: 844, isMobile: true, hasTouch: true },
+  { name: 'desktop', width: 1280, height: 720, isMobile: false, hasTouch: false }
+].filter((viewport) => !requestedViewport || viewport.name === requestedViewport);
+if (!viewports.length) throw new Error(`Unknown GALLERY_VIEWPORT: ${requestedViewport}`);
 
 await mkdir(outputDir, { recursive: true });
 
@@ -30,6 +33,23 @@ try {
     });
     const page = await context.newPage();
     page.setDefaultTimeout(120000);
+    const pageUrl = viewport.isMobile
+      ? new URL(new URL(url).pathname + new URL(url).search, 'https://gallery.test').href
+      : url;
+    const delayedArtworks = new Set();
+    if (viewport.isMobile) {
+      // Replay the local build at a secure origin with CDN-like artwork latency.
+      // Routing disables HTTP caching, so every run starts cold and needs no deployment.
+      await page.route('https://gallery.test/**', async (route) => {
+        const requestUrl = new URL(route.request().url());
+        const response = await route.fetch({ url: new URL(requestUrl.pathname + requestUrl.search, url).href });
+        if (requestUrl.pathname.startsWith('/artworks/')) {
+          await new Promise((resolve) => setTimeout(resolve, 150));
+          delayedArtworks.add(requestUrl.pathname);
+        }
+        await route.fulfill({ response });
+      });
+    }
     const consoleErrors = [];
     const failedResponses = [];
     page.on('console', (message) => {
@@ -37,15 +57,15 @@ try {
     });
     page.on('pageerror', (error) => consoleErrors.push(error.message));
     page.on('response', (response) => {
-      if (response.status() >= 400 && response.url().startsWith(new URL(url).origin + '/')) {
+      if (response.status() >= 400 && response.url().startsWith(new URL(pageUrl).origin + '/')) {
         failedResponses.push(`${response.status()} ${response.url()}`);
       }
     });
 
-    const result = { viewport: viewport.name };
+    const result = { viewport: viewport.name, scenario: viewport.isMobile ? 'secure-cold-load' : 'normal-load' };
     try {
       console.error(`[${viewport.name}] Loading the production build`);
-      await page.goto(url, { waitUntil: 'domcontentloaded' });
+      await page.goto(pageUrl, { waitUntil: 'domcontentloaded' });
       // Wait for initialization and the first frame before sending UI input.
       // Shader compilation and frame delivery are slow on CPU-only runners.
       await page.waitForFunction(
@@ -58,6 +78,24 @@ try {
       await page.locator('#welcome-start').click();
       await page.locator('#welcome').waitFor({ state: 'hidden' });
       await page.locator('#gallery-canvas').waitFor({ state: 'visible' });
+      if (viewport.isMobile) {
+        const renderer = await page.evaluate(() => {
+          const gl = document.querySelector('#gallery-canvas').getContext('webgl2');
+          if (!gl) return null;
+          const extension = gl.getExtension('WEBGL_debug_renderer_info');
+          return extension ? gl.getParameter(extension.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+        });
+        if (!renderer?.includes('SwiftShader')) throw new Error(`expected WebGL2/SwiftShader, got ${renderer}`);
+        if (delayedArtworks.size !== 4) throw new Error(`expected four delayed real artworks, got ${delayedArtworks.size}`);
+        const samples = await page.evaluate(() => window.__galleryDebug.artworkSamples());
+        const firstLoad = await readCanvasPixels(await page.locator('#gallery-canvas').screenshot(), samples);
+        await page.screenshot({ path: path.join(outputDir, 'cold-mobile.png') });
+        result.firstLoad = { renderer, delayedArtworks: [...delayedArtworks], pixelStats: firstLoad };
+        const blankArtworks = firstLoad.artworks.filter((artwork) => artwork.lumaDeviation < 12);
+        if (firstLoad.artworks.length < 2 || blankArtworks.length) {
+          throw new Error(`first cold frame contains blank artworks: ${JSON.stringify(blankArtworks)}`);
+        }
+      }
       console.error(`[${viewport.name}] Gallery ready; checking movement and artwork detail`);
       await page.waitForFunction(() =>
         performance.getEntriesByType('resource').some((entry) => entry.name.includes('/artworks/'))
